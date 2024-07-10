@@ -17,21 +17,26 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
     - name: Install Git
       run: sudo apt-get install git
 
     - name: Run detect_reverts.py
       id: detect_reverts
-      run: |
-        OLD_COMMIT_HASH=$(git rev-parse HEAD~1)
-        NEW_COMMIT_HASH=$(git rev-parse HEAD)
-        REVERT_COMMIT=$(python scripts/detect_reverts.py)
-        echo "::set-output name=revert_commit::$REVERT_COMMIT"
       env:
         OLD_COMMIT_HASH: ${{ github.event.before }}
         NEW_COMMIT_HASH: ${{ github.sha }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        OLD_COMMIT_HASH=$(git rev-parse HEAD~1)
+        NEW_COMMIT_HASH=$(git rev-parse HEAD)
+        REVERT_COMMIT=$(python scripts/detect_reverts.py)
+        echo "::set-output name=revert_commit::$REVERT_COMMIT"
 
     - name: Configure Git user
       if: steps.detect_reverts.outputs.revert_commit != ''
