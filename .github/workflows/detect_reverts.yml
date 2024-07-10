@@ -39,7 +39,7 @@ jobs:
 
     - name: Get branch name
       id: get_branch
-      run: echo "::set-output name=branch::$(git symbolic-ref --short HEAD)"
+      run: echo "::set-output name=branch::$(git rev-parse --abbrev-ref HEAD)"
 
     - name: Amend commit message
       if: steps.detect_reverts.outputs.revert_commit != ''
@@ -57,5 +57,6 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
+        BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
         git push origin HEAD:$BRANCH_NAME --force
