@@ -37,6 +37,7 @@ def is_revert(commit, all_commits):
         diff_reverse = get_diff_between_commits(potential_original_commit, commit)
         
         if diff_current == diff_reverse:
+            print("é revert")
             return True
     return False
 
