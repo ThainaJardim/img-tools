@@ -51,4 +51,11 @@ jobs:
         GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
         git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
         git rebase --continue
+
+    - name: Push changes
+      if: steps.detect_reverts.outputs.revert_commit != ''
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
         git push origin HEAD:$BRANCH_NAME --force
