@@ -30,6 +30,8 @@ jobs:
       env:
         OLD_COMMIT_HASH: ${{ github.event.before }}
         NEW_COMMIT_HASH: ${{ github.sha }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
     - name: Configure Git user
       if: steps.detect_reverts.outputs.revert_commit != ''

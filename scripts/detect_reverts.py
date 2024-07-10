@@ -1,6 +1,7 @@
 import subprocess
-from datetime import datetime, timedelta
 import os
+import requests
+from datetime import datetime, timedelta
 
 def get_commit_diffs(oldrev, newrev):
     result = subprocess.run(
@@ -44,9 +45,33 @@ def get_date_six_months_ago():
     six_months_ago = datetime.now() - timedelta(days=6*30)
     return six_months_ago.strftime('%Y-%m-%d')
 
+def get_pr_linked_to_commit(commit_hash, repo, token):
+    url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}/pulls"
+    headers = {
+        "Accept": "application/vnd.github.groot-preview+json",
+        "Authorization": f"token {token}"
+    }
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    pulls = response.json()
+    if pulls:
+        return pulls[0]["html_url"]
+    return None
+
+def is_commit_in_main(commit_hash):
+    result = subprocess.run(
+        ["git", "branch", "--contains", commit_hash],
+        capture_output=True,
+        text=True
+    )
+    branches = result.stdout.strip().split('\n')
+    return 'main' in [branch.strip() for branch in branches]
+
 def main():
     oldrev = os.getenv('OLD_COMMIT_HASH')
     newrev = os.getenv('NEW_COMMIT_HASH')
+    repo = os.getenv('GITHUB_REPOSITORY')
+    token = os.getenv('GITHUB_TOKEN')
 
     # Calcular a data de 6 meses atrás
     since_date = get_date_six_months_ago()
@@ -59,8 +84,9 @@ def main():
 
     # Verificar se algum commit recente é um revert
     for commit in commits:
-        if is_revert(commit, all_commits):
-            print(commit)
+        if is_revert(commit, all_commits) and is_commit_in_main(commit):
+            pr_url = get_pr_linked_to_commit(commit, repo, token)
+            print(f"Revert detected: {commit}, linked PR: {pr_url}")
             return commit  # Retorna o hash do commit que é um revert
 
 if __name__ == "__main__":
