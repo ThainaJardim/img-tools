@@ -28,28 +28,16 @@ def get_diff_between_commits(commit1, commit2):
     )
     return result.stdout.strip()
 
-def get_commit_changes(commit):
-    result = subprocess.run(
-        ["git", "show", "--pretty=", "--name-only", commit],
-        capture_output=True,
-        text=True
-    )
-    return result.stdout.strip().split('\n')
-
 def is_revert(commit, all_commits):
-    commit_changes = get_commit_changes(commit)
     for potential_original_commit in all_commits:
         if commit == potential_original_commit:
             continue
         
-        original_commit_changes = get_commit_changes(potential_original_commit)
-        if set(commit_changes) == set(original_commit_changes):
-            diff_current = get_diff_between_commits(commit, potential_original_commit)
-            diff_reverse = get_diff_between_commits(potential_original_commit, commit)
-            
-            if diff_current == diff_reverse:
-                print(f"Revert detected: {commit} is a revert of {potential_original_commit}")
-                return True
+        diff_current = get_diff_between_commits(commit, potential_original_commit)
+        diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+        
+        if diff_current == diff_reverse:
+            return True
     return False
 
 def get_date_six_months_ago():
