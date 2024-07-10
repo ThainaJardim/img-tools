@@ -1,6 +1,6 @@
 import subprocess
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 def get_commit_diffs(oldrev, newrev):
     result = subprocess.run(
@@ -37,12 +37,22 @@ def is_revert(commit, all_commits):
         diff_reverse = get_diff_between_commits(potential_original_commit, commit)
         
         if diff_current == diff_reverse:
+            print("é revert")
             return True
     return False
 
 def get_date_six_months_ago():
     six_months_ago = datetime.now() - timedelta(days=6*30)
     return six_months_ago.strftime('%Y-%m-%d')
+
+def is_commit_in_main(commit_hash):
+    result = subprocess.run(
+        ["git", "branch", "--contains", commit_hash],
+        capture_output=True,
+        text=True
+    )
+    branches = result.stdout.strip().split('\n')
+    return 'main' in [branch.strip() for branch in branches]
 
 def main():
     oldrev = os.getenv('OLD_COMMIT_HASH')
@@ -60,7 +70,7 @@ def main():
     # Verificar se algum commit recente é um revert
     for commit in commits:
         if is_revert(commit, all_commits):
-            print(commit)
+            print(f"Revert detected: {commit}")
             return commit  # Retorna o hash do commit que é um revert
 
 if __name__ == "__main__":
