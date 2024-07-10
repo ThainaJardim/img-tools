@@ -11,7 +11,7 @@ import (
 func main() {
 	currentTime := time.Now()
 
-	images, err := tools.LoadImagesFromDir("./imagess")
+	images, err := tools.LoadImagesFromDir("./images")
 	if err != nil {
 		log.Fatalf("failed to load images: %v", err)
 	}
