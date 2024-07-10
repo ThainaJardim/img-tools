@@ -1,6 +1,6 @@
 import subprocess
 from datetime import datetime, timedelta
-import os
+
 
 # Obtém o commit mais recente
 def get_most_recent_commit():
