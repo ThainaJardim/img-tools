@@ -22,7 +22,7 @@ func main() {
 		log.Fatalf("failed to save images: %v", err)
 	}
 	// in seconds
-	log.Printf("processingg took %v", time.Since(currentTime))
+	log.Printf("processing took %v", time.Since(currentTime))
 
 	fmt.Println("processing completed!")
 }
