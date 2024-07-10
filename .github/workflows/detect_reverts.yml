@@ -31,6 +31,12 @@ jobs:
         OLD_COMMIT_HASH: ${{ github.event.before }}
         NEW_COMMIT_HASH: ${{ github.sha }}
 
+    - name: Configure Git user
+      if: steps.detect_reverts.outputs.revert_commit != ''
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+
     - name: Check if revert commit and amend message
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
