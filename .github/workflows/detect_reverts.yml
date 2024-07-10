@@ -49,7 +49,7 @@ jobs:
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
         GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
+        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)" || git rebase --skip
         git rebase --continue
 
     - name: Push changes
