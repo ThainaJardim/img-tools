@@ -13,7 +13,7 @@ func main() {
 
 	images, err := tools.LoadImagesFromDir("./imagess")
 	if err != nil {
-		log.Fatalf("Failed to load images: %v", err)
+		log.Fatalf("failed to load images: %v", err)
 	}
 
 	processedImages := tools.ProcessImages(images)
