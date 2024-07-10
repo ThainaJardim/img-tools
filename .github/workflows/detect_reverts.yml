@@ -41,13 +41,14 @@ jobs:
       id: get_branch
       run: echo "::set-output name=branch::$(git symbolic-ref --short HEAD)"
 
-    - name: Check if revert commit and amend message
+    - name: Amend commit message
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
         REVERT_COMMIT=${{ steps.detect_reverts.outputs.revert_commit }}
         BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
-        git cherry-pick $REVERT_COMMIT
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
+        git rebase -i --root << EOF
+        exec git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
+        EOF
         git push origin HEAD:$BRANCH_NAME --force
