@@ -44,6 +44,15 @@ def get_date_six_months_ago():
     six_months_ago = datetime.now() - timedelta(days=6*30)
     return six_months_ago.strftime('%Y-%m-%d')
 
+def is_commit_in_main(commit_hash):
+    result = subprocess.run(
+        ["git", "branch", "--contains", commit_hash],
+        capture_output=True,
+        text=True
+    )
+    branches = result.stdout.strip().split('\n')
+    return 'main' in [branch.strip() for branch in branches]
+
 def main():
     oldrev = os.getenv('OLD_COMMIT_HASH')
     newrev = os.getenv('NEW_COMMIT_HASH')
@@ -59,7 +68,7 @@ def main():
 
     # Verificar se algum commit recente é um revert
     for commit in commits:
-        if is_revert(commit, all_commits):
+        if is_revert(commit, all_commits) and is_commit_in_main(commit) :
             print(commit)
             return commit  # Retorna o hash do commit que é um revert
 
