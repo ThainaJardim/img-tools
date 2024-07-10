@@ -19,10 +19,10 @@ func main() {
 	processedImages := tools.ProcessImages(images)
 
 	if err := tools.SaveProcessedImages(processedImages, "output_images"); err != nil {
-		log.Fatalf("failed to save images: %v", err)
+		log.Fatalf("Failed to save images: %v", err)
 	}
 	// in seconds
-	log.Printf("processing took %v", time.Since(currentTime))
+	log.Printf("Processing took %v", time.Since(currentTime))
 
-	fmt.Println("processing completed!")
+	fmt.Println("Processing completed!")
 }
