@@ -13,7 +13,6 @@ func saveImage(img image.Image, path string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("saving image to0 %s\n", path)
 	defer file.Close()
 
 	return jpeg.Encode(file, img, nil)
