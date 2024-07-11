@@ -23,6 +23,8 @@ func decodeImg(path string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("Decoding image: ", path)
 	defer file.Close()
 
 	ext := filepath.Ext(path)
