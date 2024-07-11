@@ -73,8 +73,7 @@ def main():
 
     # Verificar se o commit recente é um revert
     if is_revert(recent_commit, all_commits):
-        print(f"Revert commit detected: {recent_commit}")
-        return recent_commit  # Retorna o hash do commit que é um revert
+        print(recent_commit)  # Retorna apenas o hash do commit que é um revert
 
 if __name__ == "__main__":
     main()
