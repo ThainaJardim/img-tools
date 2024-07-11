@@ -1,4 +1,4 @@
-name: Detect Reverts and Amend Commit Message
+name: Detect Reverts and Verify Commit Message
 
 on: [push]
 
@@ -31,32 +31,14 @@ jobs:
         OLD_COMMIT_HASH: ${{ github.event.before }}
         NEW_COMMIT_HASH: ${{ github.sha }}
 
-    - name: Configure Git user
-      if: steps.detect_reverts.outputs.revert_commit != ''
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-
-    - name: Get branch name
-      id: get_branch
-      run: echo "::set-output name=branch::$(git rev-parse --abbrev-ref HEAD)"
-
-    - name: Amend commit message
+    - name: Check commit message
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
         REVERT_COMMIT=${{ steps.detect_reverts.outputs.revert_commit }}
-        BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
-        echo "Revert commit detected: $REVERT_COMMIT"
-        git checkout $BRANCH_NAME
-        GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
-        git rebase --continue
-
-    - name: Push changes
-      if: steps.detect_reverts.outputs.revert_commit != ''
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      run: |
-        BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
-        git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
-        git push origin HEAD:$BRANCH_NAME --force
+        COMMIT_MESSAGE=$(git log -1 --pretty=%B $REVERT_COMMIT)
+        if [[ ! $COMMIT_MESSAGE =~ ^Revert ]]; then
+          echo "Error: Revert commit detected: $REVERT_COMMIT with incorrect message, expected start with 'Revert'"
+          exit 1
+        else
+          echo "Revert commit detected: $REVERT_COMMIT with correct message"
+        fi

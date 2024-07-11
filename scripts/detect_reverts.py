@@ -13,7 +13,7 @@ def get_commit_diffs(oldrev, newrev):
 
 def get_all_commits_since(since_date):
     result = subprocess.run(
-        ["git", "rev-list", "--all", f"--since={since_date}"],
+        ["git", "rev-list", "--all","--merges", f"--since={since_date}", "--reverse"],
         capture_output=True,
         text=True
     )

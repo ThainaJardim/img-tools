@@ -23,6 +23,7 @@ func decodeImg(path string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer file.Close()
 
 	ext := filepath.Ext(path)
