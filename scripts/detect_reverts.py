@@ -13,14 +13,14 @@ def get_commit_diffs(oldrev, newrev):
 
 def get_main_or_master_branch():
     branches = subprocess.run(
-        ["git", "branch", "--list", "main", "master"],
+        ["git", "branch", "-r", "--list", "origin/main", "origin/master"],
         capture_output=True,
         text=True
     )
     branches = branches.stdout.strip().split('\n')
-    if "main" in branches:
+    if "origin/main" in branches:
         return "main"
-    elif "master" in branches:
+    elif "origin/master" in branches:
         return "master"
     else:
         raise ValueError("Neither 'main' nor 'master' branch found in the repository")
