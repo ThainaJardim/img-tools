@@ -48,14 +48,15 @@ jobs:
         BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
-        GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
 
-        # Adiciona um comando de rebase para pular commits vazios
-        REBASE_EDITOR="sed -i 's/^pick/exec git rebase --skip || true/'"
-        GIT_SEQUENCE_EDITOR="$GIT_SEQUENCE_EDITOR; $REBASE_EDITOR" git rebase -i --root
+        # Modify rebase sequence to handle empty commits
+        GIT_SEQUENCE_EDITOR="sed -i 's/^pick/edit/'"
+        export GIT_SEQUENCE_EDITOR
+        git rebase -i --root || true
 
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
-        git rebase --continue || git rebase --skip
+        while ! git rebase --continue 2>/dev/null; do
+          git rebase --skip
+        done
 
     - name: Push changes
       if: steps.detect_reverts.outputs.revert_commit != ''
