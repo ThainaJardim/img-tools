@@ -57,6 +57,16 @@ def get_second_parent_commit(commit):
     return second_parent_commit
 
 
+def parse_diff(diff):
+    added_lines = set()
+    removed_lines = set()
+    for line in diff.split('\n'):
+        if line.startswith('+') and not line.startswith('+++'):
+            added_lines.add(line[1:])
+        elif line.startswith('-') and not line.startswith('---'):
+            removed_lines.add(line[1:])
+    return added_lines, removed_lines
+
 def is_revert(commit, merges):
     commit_files = get_commit_diff(commit)
     for m in merges:
@@ -76,8 +86,11 @@ def is_revert(commit, merges):
             print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
             print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
 
-           # Verificar se o diff do commit atual para o commit original é o inverso do diff do commit original para o commit atual 
-            if diff_current == diff_reverse:
+            added_current, removed_current = parse_diff(diff_current)
+            added_reverse, removed_reverse = parse_diff(diff_reverse)
+
+            # Verificar se as linhas adicionadas/removidas são inversas entre os diffs
+            if added_current == removed_reverse and removed_current == added_reverse:
                 print(f"O commit {commit} é um revert do commit {potential_original_commit}")
                 return True
     return False
