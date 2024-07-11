@@ -38,7 +38,7 @@ def get_main_or_master_branch():
 
 def get_merges_in_branch_since(branch, since_date):
     result = subprocess.run(
-        ["git", "rev-list", branch, "--merges", f"--since={since_date}", "--reverse"],
+        ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
         capture_output=True,
         text=True
     )
@@ -61,7 +61,6 @@ def get_second_parent_commit(commit):
     if not commit:
         print("Commit vazio")
         return ""
-    print(f"Obtendo segundo pai para o commit {commit}")
     result = run_git_command(["git", "rev-parse", f"{commit}^2"])
     if result.returncode != 0:
         print(f"Erro ao obter segundo pai do commit {commit}: {result.stderr}")
@@ -69,15 +68,9 @@ def get_second_parent_commit(commit):
     print(f"Segundo pai do commit {commit}: {second_parent_commit}")
     return second_parent_commit
 
-def parse_diff(diff):
-    added_lines = set()
-    removed_lines = set()
-    for line in diff.split('\n'):
-        if line.startswith('+') and not line.startswith('+++'):
-            added_lines.add(line[1:])
-        elif line.startswith('-') and not line.startswith('---'):
-            removed_lines.add(line[1:])
-    return added_lines, removed_lines
+def remove_plus_and_minus(diff):
+    return diff.replace("+", "").replace("-", "")
+    
 
 def is_revert(commit, merges):
     if not commit:
@@ -94,12 +87,13 @@ def is_revert(commit, merges):
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
 
-            added_current, removed_current = parse_diff(diff_current)
-            added_reverse, removed_reverse = parse_diff(diff_reverse)
+            print(f"Diff between {commit} and {potential_original_commit}:")
+            print(diff_current)
+            print(f"Diff between {potential_original_commit} and {commit}:")
+            print(diff_reverse)
 
-            # Verificar se as linhas adicionadas/removidas são inversas entre os diffs
-            if added_current == removed_reverse and removed_current == added_reverse:
-                print("encontrado revert")
+            if diff_current == diff_reverse:
+                print(f"Commit {commit} é um revert de {potential_original_commit}")
                 return True
     return False
 
