@@ -125,6 +125,7 @@ def main():
     #     print("O commit não é um revert")
     #     return "6c5f2ae650dac47262714c5850ea52591d92e4a1"
 
+    print(merges)
     return merges
 
 if __name__ == "__main__":

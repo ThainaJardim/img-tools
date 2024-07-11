@@ -25,7 +25,7 @@ jobs:
       run: |
         NEW_COMMIT_HASH=$(git rev-parse HEAD)
         REVERT_COMMIT=$(python scripts/detect_reverts.py)
-        echo "::set-output name=revert_commit::$REVERT_COMMIT"
+        echo "revert_commit=$REVERT_COMMIT" >> $GITHUB_ENV
       env:
         NEW_COMMIT_HASH: ${{ github.sha }}
 
