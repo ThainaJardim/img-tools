@@ -2,6 +2,13 @@ import subprocess
 from datetime import datetime, timedelta
 import os
 
+
+def run_git_command(command):
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Erro ao executar comando {' '.join(command)}: {result.stderr}")
+    return result
+
 def get_commit_diff(commit):
     result = subprocess.run(
         ["git", "show", commit, "--pretty=format:", "--name-only"],
@@ -42,19 +49,36 @@ def get_diff_between_commits(commit1, commit2):
     )
     return result.stdout.strip()
 
+def get_second_parent_commit(commit):
+    print(f"Obtendo segundo pai para o commit {commit}")
+    result = run_git_command(["git", "rev-parse", f"{commit}^2"])
+    second_parent_commit = result.stdout.strip()
+    print(f"Segundo pai do commit {commit}: {second_parent_commit}")
+    return second_parent_commit
+
+
 def is_revert(commit, merges):
     commit_files = get_commit_diff(commit)
-    for potential_original_commit in merges:
+    for m in merges:
+        potential_original_commit = get_second_parent_commit(m)
         if commit == potential_original_commit:
             continue
         
         original_files = get_commit_diff(potential_original_commit)
+        print(f"Comparando commit {commit} com commit {potential_original_commit}")
+        print(f"Arquivos alterados no commit {commit}: {commit_files}")
+        print(f"Arquivos alterados no commit {potential_original_commit}: {original_files}")
         
         if set(commit_files) == set(original_files):
+            print("Entra aqui")
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
-            
+            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
+            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
+
+           # Verificar se o diff do commit atual para o commit original é o inverso do diff do commit original para o commit atual 
             if diff_current == diff_reverse:
+                print(f"O commit {commit} é um revert do commit {potential_original_commit}")
                 return True
     return False
 
