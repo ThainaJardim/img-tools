@@ -24,8 +24,6 @@ func decodeImg(path string) (image.Image, error) {
 		return nil, err
 	}
 
-	defer file.Close()
-
 	ext := filepath.Ext(path)
 	switch ext {
 	case ".jpg", ".jpeg":
