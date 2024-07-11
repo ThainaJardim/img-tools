@@ -109,8 +109,7 @@ def get_date_six_months_ago():
     return six_months_ago.strftime('%Y-%m-%d')
 
 def main():
-  #  newrev = os.getenv('NEW_COMMIT_HASH')
-    newrev = "0fbc0a85c4ed4d218fe3789a72fcae8e5988c552"
+    newrev = os.getenv('NEW_COMMIT_HASH')
 
     # Calcular a data de 6 meses atrás
     since_date = get_date_six_months_ago()
