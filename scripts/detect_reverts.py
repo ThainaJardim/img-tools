@@ -60,7 +60,6 @@ def get_second_parent_commit(commit):
     if result.returncode != 0:
         print(f"Erro ao obter segundo pai do commit {commit}: {result.stderr}")
     second_parent_commit = result.stdout.strip()
-    print(f"Segundo pai do commit {commit}: {second_parent_commit}")
     return second_parent_commit
 
 
@@ -99,7 +98,6 @@ def is_revert(commit, merges):
             add2, del2 = extract_changes(diff_reverse)
             
             if sorted(add1) == sorted(del2) and sorted(del1) == sorted(add2):
-                print(f"O commit {commit} é um revert do commit {potential_original_commit}")
                 return True
         
     return False
