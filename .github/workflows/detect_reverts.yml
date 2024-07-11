@@ -26,7 +26,7 @@ jobs:
     - name: Run detect_reverts.py
       id: detect_reverts
       run: |
-        REVERT_COMMIT=$(python scripts/detect_reverts.py)
+        REVERT_COMMIT=$(python scripts/detect_reverts.py | sed 's/Revert commit detected: //')
         echo "::set-output name=revert_commit::$REVERT_COMMIT"
 
     - name: Configure Git user
@@ -46,13 +46,8 @@ jobs:
         BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
-        echo "pick ${REVERT_COMMIT:7:7}"
         GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
-
-    - name: Amend commit and continue rebase
-      if: steps.detect_reverts.outputs.revert_commit != ''
-      run: |
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)" || git rebase --skip
+        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
         git rebase --continue
 
     - name: Push changes
