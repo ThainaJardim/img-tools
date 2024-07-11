@@ -65,3 +65,7 @@ func LoadImagesFromDir(dir string) ([]image.Image, error) {
 	}
 	return images, nil
 }
+
+func init() {
+	fmt.Print("test")
+}
