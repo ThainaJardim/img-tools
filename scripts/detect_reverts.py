@@ -19,21 +19,33 @@ def get_main_or_master_branch():
     )
     branches = branches.stdout.strip().split('\n')
     if "origin/main" in branches:
-        return "main"
+        return "origin/main"
     elif "origin/master" in branches:
-        return "master"
+        return "origin/master"
     else:
         raise ValueError("Neither 'main' nor 'master' branch found in the repository")
 
 def get_merges_in_branch_since(branch, since_date):
-    result = subprocess.run(
-        ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
-        capture_output=True,
-        text=True
-    )
-    merges = result.stdout.strip().split('\n')
-    return merges
-
+    try:
+        # Executa o comando git rev-list para obter merges desde a data especificada
+        result = subprocess.run(
+            ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
+            capture_output=True,
+            text=True
+        )
+        
+        # Verifica se o comando foi executado com sucesso
+        if result.returncode != 0:
+            print(f"Erro ao executar git rev-list: {result.stderr}")
+            return []
+        
+        # Divide a saída em linhas e remove espaços em branco
+        merges = result.stdout.strip().split('\n')
+        return merges
+    except Exception as e:
+        print(f"Erro ao obter merges: {e}")
+        return []
+    
 def run_git_command(command):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
@@ -48,8 +60,8 @@ def get_second_parent_commit(commit):
     if result.returncode != 0:
         print(f"Erro ao obter segundo pai do commit {commit}: {result.stderr}")
     second_parent_commit = result.stdout.strip()
-    print(f"Segundo pai do commit {commit}: {second_parent_commit}")
     return second_parent_commit
+
 
 def get_diff_between_commits(commit1, commit2):
     result = subprocess.run(
@@ -58,6 +70,16 @@ def get_diff_between_commits(commit1, commit2):
         text=True
     )
     return result.stdout.strip()
+
+def extract_changes(diff_text):
+    additions = []
+    deletions = []
+    for line in diff_text.split('\n'):
+        if line.startswith('+') and not line.startswith('+++'):
+            additions.append(line[1:].strip())
+        elif line.startswith('-') and not line.startswith('---'):
+            deletions.append(line[1:].strip())
+    return additions, deletions
 
 def is_revert(commit, merges):
     commit_files = get_commit_diff(commit)
@@ -71,11 +93,13 @@ def is_revert(commit, merges):
         if set(commit_files) == set(original_files):
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
-            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
-            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
+
+            add1, del1 = extract_changes(diff_current)
+            add2, del2 = extract_changes(diff_reverse)
             
-            if diff_current == diff_reverse:
+            if sorted(add1) == sorted(del2) and sorted(del1) == sorted(add2):
                 return True
+        
     return False
 
 def get_date_six_months_ago():
@@ -97,7 +121,11 @@ def main():
     # Verificar se o commit recente é um revert
     if is_revert(newrev, merges):
         print(newrev)
-        return newrev  # Retorna o hash do commit que é um revert
+        print("O commit é um revert")
+        return newrev 
+    else:
+        print("O commit não é um revert")
+        return ""
 
 if __name__ == "__main__":
     main()
