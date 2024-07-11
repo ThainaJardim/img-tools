@@ -115,15 +115,40 @@ def main():
     # Obter todos os commits de merge na branch principal desde a data calculada, em ordem cronológica reversa (mais recentes primeiro)
     merges = get_merges_in_branch_since(branch, since_date)
 
-    # Verificar se o commit recente é um revert
-    if is_revert(newrev, merges):
-        print(newrev)
-        print("O commit é um revert")
-        return "6c5f2ae650dac47262714c5850ea52591d92e4a1"  # Retorna o hash do commit que é um revert
-    else:
-        print(newrev)
-        print("O commit não é um revert")
-        return None
+    # # Verificar se o commit recente é um revert
+    # if is_revert(newrev, merges):
+    #     print(newrev)
+    #     print("O commit é um revert")
+    #     return newrev  # Retorna o hash do commit que é um revert
+    # else:
+    #     print(newrev)
+    #     print("O commit não é um revert")
+    #     return "6c5f2ae650dac47262714c5850ea52591d92e4a1"
+
+    return merges
 
 if __name__ == "__main__":
     main()
+
+
+def is_revert(commit, merges):
+    commit_files = get_commit_diff(commit)
+    for m in merges:
+        potential_original_commit = get_second_parent_commit(m)
+        if commit == potential_original_commit:
+            continue
+        
+        original_files = get_commit_diff(potential_original_commit)
+        
+        if set(commit_files) == set(original_files):
+            diff_current = get_diff_between_commits(commit, potential_original_commit)
+            diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+
+            add1, del1 = extract_changes(diff_current)
+            add2, del2 = extract_changes(diff_reverse)
+        
+            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
+            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
+            
+           
+    return False
