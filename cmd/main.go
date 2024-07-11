@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/ThainaJardim/img-tools/pkg/tools"
 )
 
 func main() {
-	//currentTime := time.Now()
+	currentTime := time.Now()
 
 	images, err := tools.LoadImagesFromDir("./images")
 	if err != nil {
@@ -21,7 +22,7 @@ func main() {
 		log.Fatalf("failed to save images: %v", err)
 	}
 	// in seconds
-	//log.Printf("processing took %v", time.Since(currentTime))
+	log.Printf("processing took %v", time.Since(currentTime))
 
 	fmt.Println("processing completed!")
 }
