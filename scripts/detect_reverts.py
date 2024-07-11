@@ -51,6 +51,7 @@ def get_second_parent_commit(commit):
     print(f"Segundo pai do commit {commit}: {second_parent_commit}")
     return second_parent_commit
 
+
 def get_diff_between_commits(commit1, commit2):
     result = subprocess.run(
         ["git", "diff", commit1, commit2],
@@ -58,6 +59,16 @@ def get_diff_between_commits(commit1, commit2):
         text=True
     )
     return result.stdout.strip()
+
+def extract_changes(diff_text):
+    additions = []
+    deletions = []
+    for line in diff_text.split('\n'):
+        if line.startswith('+') and not line.startswith('+++'):
+            additions.append(line[1:].strip())
+        elif line.startswith('-') and not line.startswith('---'):
+            deletions.append(line[1:].strip())
+    return additions, deletions
 
 def is_revert(commit, merges):
     commit_files = get_commit_diff(commit)
@@ -71,11 +82,20 @@ def is_revert(commit, merges):
         if set(commit_files) == set(original_files):
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+
+            add1, del1 = extract_changes(diff_current)
+            add2, del2 = extract_changes(diff_reverse)
+        
             print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
             print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
             
-            if diff_current == diff_reverse:
+            if sorted(add1) == sorted(del2) and sorted(del1) == sorted(add2):
+                print(f"O commit {commit} é um revert do commit {potential_original_commit}")
                 return True
+            else:
+                print(f"O commit {commit} não é um revert do commit {potential_original_commit}")
+ 
+            return
     return False
 
 def get_date_six_months_ago():
