@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -24,5 +23,5 @@ func main() {
 	// in seconds
 	log.Printf("processing took %v", time.Since(currentTime))
 
-	fmt.Println("processing completed!")
+	//fmt.Println("processing completed!")
 }
