@@ -1,4 +1,4 @@
-name: Detect Reverts After Merge
+name: Detect Reverts
 
 on: [push]
 

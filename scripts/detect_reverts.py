@@ -71,6 +71,8 @@ def is_revert(commit, merges):
         if set(commit_files) == set(original_files):
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
+            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
             
             if diff_current == diff_reverse:
                 return True
