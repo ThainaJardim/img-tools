@@ -1,40 +1,40 @@
-# name: Detect Reverts After Merge
+name: Detect Reverts After Merge
 
-# on:
-#   push:
-#     branches:
-#       - main
-#       - master
+on:
+  push:
+    branches:
+      - main
+      - master
 
-# jobs:
-#   detect_reverts:
-#     runs-on: ubuntu-latest
+jobs:
+  detect_reverts:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
-#       with:
-#         fetch-depth: 0  # Fetch all history for all branches and tags
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
 
-#     - name: Setup Python
-#       uses: actions/setup-python@v2
-#       with:
-#         python-version: '3.x'
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-#     - name: Install Git
-#       run: sudo apt-get install git
+    - name: Install Git
+      run: sudo apt-get install git
 
-#     - name: Run detect_reverts.py
-#       id: detect_reverts
-#       run: |
-#         NEW_COMMIT_HASH=$(git rev-parse HEAD)
-#         REVERT_COMMIT=$(python scripts/detect_reverts.py)
-#         echo "::set-output name=revert_commit::$REVERT_COMMIT"
-#       env:
-#         NEW_COMMIT_HASH: ${{ github.sha }}
+    - name: Run detect_reverts.py
+      id: detect_reverts
+      run: |
+        NEW_COMMIT_HASH=$(git rev-parse HEAD)
+        REVERT_COMMIT=$(python scripts/detect_reverts.py)
+        echo "::set-output name=revert_commit::$REVERT_COMMIT"
+      env:
+        NEW_COMMIT_HASH: ${{ github.sha }}
 
-#     - name: Check revert commit
-#       if: steps.detect_reverts.outputs.revert_commit != ''
-#       run: |
-#         echo "Revert commit detected: ${{ steps.detect_reverts.outputs.revert_commit }}"
-#         exit 1  # Fail the job if a revert commit is detected
+    - name: Check revert commit
+      if: steps.detect_reverts.outputs.revert_commit != ''
+      run: |
+        echo "Revert commit detected: ${{ steps.detect_reverts.outputs.revert_commit }}"
+        exit 1  # Fail the job if a revert commit is detected
