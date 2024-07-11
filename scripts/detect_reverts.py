@@ -2,14 +2,14 @@ import subprocess
 from datetime import datetime, timedelta
 import os
 
-def get_commit_diffs(oldrev, newrev):
+def get_commit_diff(commit):
     result = subprocess.run(
-        ["git", "rev-list", f"{oldrev}..{newrev}"],
+        ["git", "show", commit, "--pretty=format:", "--name-only"],
         capture_output=True,
         text=True
     )
-    commits = result.stdout.strip().split('\n')
-    return commits
+    files_changed = result.stdout.strip().split('\n')
+    return files_changed
 
 def get_main_or_master_branch():
     branches = subprocess.run(
@@ -43,15 +43,19 @@ def get_diff_between_commits(commit1, commit2):
     return result.stdout.strip()
 
 def is_revert(commit, merges):
+    commit_files = get_commit_diff(commit)
     for potential_original_commit in merges:
         if commit == potential_original_commit:
             continue
         
-        diff_current = get_diff_between_commits(commit, potential_original_commit)
-        diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+        original_files = get_commit_diff(potential_original_commit)
         
-        if diff_current == diff_reverse:
-            return True
+        if set(commit_files) == set(original_files):
+            diff_current = get_diff_between_commits(commit, potential_original_commit)
+            diff_reverse = get_diff_between_commits(potential_original_commit, commit)
+            
+            if diff_current == diff_reverse:
+                return True
     return False
 
 def get_date_six_months_ago():
@@ -59,7 +63,6 @@ def get_date_six_months_ago():
     return six_months_ago.strftime('%Y-%m-%d')
 
 def main():
-    oldrev = os.getenv('OLD_COMMIT_HASH')
     newrev = os.getenv('NEW_COMMIT_HASH')
 
     # Calcular a data de 6 meses atrás
@@ -71,14 +74,10 @@ def main():
     # Obter todos os commits de merge na branch principal desde a data calculada, em ordem cronológica reversa (mais recentes primeiro)
     merges = get_merges_in_branch_since(branch, since_date)
 
-    # Obter os commits entre as revisões especificadas
-    commits = get_commit_diffs(oldrev, newrev)
-
-    # Verificar se algum commit recente é um revert
-    for commit in commits:
-        if is_revert(commit, merges):
-            print(commit)
-            return commit  # Retorna o hash do commit que é um revert
+    # Verificar se o commit recente é um revert
+    if is_revert(newrev, merges):
+        print(newrev)
+        return newrev  # Retorna o hash do commit que é um revert
 
 if __name__ == "__main__":
     main()
