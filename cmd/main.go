@@ -16,8 +16,6 @@ func main() {
 		log.Fatalf("failed to load images: %v", err)
 	}
 
-	fmt.Printf("loaded %d images\n", len(images))
-
 	processedImages := tools.ProcessImages(images)
 
 	if err := tools.SaveProcessedImages(processedImages, "output_images"); err != nil {
