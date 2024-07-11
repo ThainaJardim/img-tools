@@ -3,6 +3,7 @@ package tools
 import (
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -27,12 +28,12 @@ func decodeImg(path string) (image.Image, error) {
 
 	ext := filepath.Ext(path)
 	switch ext {
-	// case ".jpg", ".jpeg":
-	// 	img, err := jpeg.Decode(file)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	return img, nil
+	case ".jpg", ".jpeg":
+		img, err := jpeg.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+		return img, nil
 	case ".png":
 		img, err := png.Decode(file)
 		if err != nil {
