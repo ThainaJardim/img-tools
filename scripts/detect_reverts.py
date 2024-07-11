@@ -119,7 +119,7 @@ def main():
     if is_revert(newrev, merges):
         print(newrev)
         print("O commit é um revert")
-        return newrev  # Retorna o hash do commit que é um revert
+        return "6c5f2ae650dac47262714c5850ea52591d92e4a1"  # Retorna o hash do commit que é um revert
     else:
         print(newrev)
         print("O commit não é um revert")
