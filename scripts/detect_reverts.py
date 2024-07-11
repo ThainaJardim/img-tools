@@ -118,7 +118,12 @@ def main():
     # Verificar se o commit recente é um revert
     if is_revert(newrev, merges):
         print(newrev)
+        print("O commit é um revert")
         return newrev  # Retorna o hash do commit que é um revert
+    else:
+        print(newrev)
+        print("O commit não é um revert")
+        return None
 
 if __name__ == "__main__":
     main()
