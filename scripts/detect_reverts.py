@@ -19,9 +19,9 @@ def get_main_or_master_branch():
     )
     branches = branches.stdout.strip().split('\n')
     if "origin/main" in branches:
-        return "main"
+        return "origin/main"
     elif "origin/master" in branches:
-        return "master"
+        return "origin/master"
     else:
         raise ValueError("Neither 'main' nor 'master' branch found in the repository")
 
