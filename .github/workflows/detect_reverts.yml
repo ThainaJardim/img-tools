@@ -36,11 +36,12 @@ jobs:
     - name: Amend commit message
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
-        REVERT_COMMIT=${{ steps.detect_reverts.outputs.revert_commit }}
+        REVERT_COMMIT=$(echo "${{ steps.detect_reverts.outputs.revert_commit }}" | sed 's/Revert commit detected: //')
         BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
-        GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root
+        # Ensure the command is correctly formatted and executed
+        GIT_SEQUENCE_EDITOR="sed -i 's/pick $REVERT_COMMIT/edit $REVERT_COMMIT/'" git rebase -i --root
         git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
         git rebase --continue
         
