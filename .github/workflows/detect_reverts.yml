@@ -20,6 +20,10 @@ jobs:
     - name: Install Git
       run: sudo apt-get install git
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+
     - name: Run detect_reverts.py
       id: detect_reverts
       run: |
