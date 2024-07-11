@@ -127,18 +127,14 @@ def main():
     # Obter todos os commits de merge na branch principal desde a data calculada, em ordem cronológica reversa (mais recentes primeiro)
     merges = get_merges_in_branch_since(branch, since_date)
 
-    # # Verificar se o commit recente é um revert
-    # if is_revert(newrev, merges):
-    #     print(newrev)
-    #     print("O commit é um revert")
-    #     return newrev  # Retorna o hash do commit que é um revert
-    # else:
-    #     print(newrev)
-    #     print("O commit não é um revert")
-    #     return "6c5f2ae650dac47262714c5850ea52591d92e4a1"
-
-    print(merges)
-    return merges
+    # Verificar se o commit recente é um revert
+    if is_revert(newrev, merges):
+        print(newrev)
+        print("O commit é um revert")
+        return newrev  # Retorna o hash do commit que é um revert
+    else:
+        print("O commit não é um revert")
+        return ""
 
 if __name__ == "__main__":
     main()
