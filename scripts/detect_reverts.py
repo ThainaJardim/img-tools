@@ -27,12 +27,29 @@ def get_main_or_master_branch():
 
 def get_merges_in_branch_since(branch, since_date):
     result = subprocess.run(
-        ["git", "rev-list", branch, "--merges", f"--since={since_date}", "--reverse"],
+        ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
         capture_output=True,
         text=True
     )
     merges = result.stdout.strip().split('\n')
     return merges
+
+def run_git_command(command):
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Erro ao executar comando {' '.join(command)}: {result.stderr}")
+    return result
+
+def get_second_parent_commit(commit):
+    if not commit:
+        print("Commit vazio")
+        return ""
+    result = run_git_command(["git", "rev-parse", f"{commit}^2"])
+    if result.returncode != 0:
+        print(f"Erro ao obter segundo pai do commit {commit}: {result.stderr}")
+    second_parent_commit = result.stdout.strip()
+    print(f"Segundo pai do commit {commit}: {second_parent_commit}")
+    return second_parent_commit
 
 def get_diff_between_commits(commit1, commit2):
     result = subprocess.run(
@@ -44,7 +61,8 @@ def get_diff_between_commits(commit1, commit2):
 
 def is_revert(commit, merges):
     commit_files = get_commit_diff(commit)
-    for potential_original_commit in merges:
+    for m in merges:
+        potential_original_commit = get_second_parent_commit(m)
         if commit == potential_original_commit:
             continue
         
