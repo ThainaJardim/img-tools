@@ -1,10 +1,6 @@
 name: Detect Reverts After Merge
 
-on:
-  push:
-    branches:
-      - main
-      - master
+on: [push]
 
 jobs:
   detect_reverts:
