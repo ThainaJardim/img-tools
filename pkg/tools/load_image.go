@@ -68,5 +68,4 @@ func LoadImagesFromDir(dir string) ([]image.Image, error) {
 
 func init() {
 	fmt.Print("test")
-	fmt.Print("hellou")
 }
