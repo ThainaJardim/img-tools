@@ -42,7 +42,7 @@ def run_git_command(command):
 
 def get_second_parent_commit(commit):
     if not commit:
-        print("Commit vazio")
+        print("")
         return ""
     result = run_git_command(["git", "rev-parse", f"{commit}^2"])
     if result.returncode != 0:
