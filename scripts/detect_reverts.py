@@ -97,17 +97,11 @@ def is_revert(commit, merges):
 
             add1, del1 = extract_changes(diff_current)
             add2, del2 = extract_changes(diff_reverse)
-        
-            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
-            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
             
             if sorted(add1) == sorted(del2) and sorted(del1) == sorted(add2):
                 print(f"O commit {commit} é um revert do commit {potential_original_commit}")
                 return True
-            else:
-                print(f"O commit {commit} não é um revert do commit {potential_original_commit}")
- 
-            return
+        
     return False
 
 def get_date_six_months_ago():
