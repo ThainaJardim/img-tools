@@ -23,7 +23,7 @@ func SaveProcessedImages(images []image.Image, dir string) error {
 		return err
 	}
 	for i, img := range images {
-		path := filepath.Join(dir, fmt.Sprintf("processed_%d.jpg", i))
+		path := filepath.Join(dir, fmt.Sprintf("processed_%d.jp", i))
 		if err := saveImage(img, path); err != nil {
 			return err
 		}
