@@ -2,7 +2,6 @@ import subprocess
 from datetime import datetime, timedelta
 import os
 
-
 def run_git_command(command):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
@@ -10,11 +9,16 @@ def run_git_command(command):
     return result
 
 def get_commit_diff(commit):
+    if not commit:
+        print("Commit vazio")
+        return []
     result = subprocess.run(
         ["git", "show", commit, "--pretty=format:", "--name-only"],
         capture_output=True,
         text=True
     )
+    if result.returncode != 0:
+        print(f"Erro ao obter diff do commit {commit}: {result.stderr}")
     files_changed = result.stdout.strip().split('\n')
     return files_changed
 
@@ -38,6 +42,8 @@ def get_merges_in_branch_since(branch, since_date):
         capture_output=True,
         text=True
     )
+    if result.returncode != 0:
+        print(f"Erro ao obter merges na branch {branch}: {result.stderr}")
     merges = result.stdout.strip().split('\n')
     return merges
 
@@ -47,13 +53,21 @@ def get_diff_between_commits(commit1, commit2):
         capture_output=True,
         text=True
     )
+    if result.returncode != 0:
+        print(f"Erro ao comparar diffs entre {commit1} e {commit2}: {result.stderr}")
     return result.stdout.strip()
 
 def get_second_parent_commit(commit):
+    if not commit:
+        print("Commit vazio")
+        return ""
+    print(f"Obtendo segundo pai para o commit {commit}")
     result = run_git_command(["git", "rev-parse", f"{commit}^2"])
+    if result.returncode != 0:
+        print(f"Erro ao obter segundo pai do commit {commit}: {result.stderr}")
     second_parent_commit = result.stdout.strip()
+    print(f"Segundo pai do commit {commit}: {second_parent_commit}")
     return second_parent_commit
-
 
 def parse_diff(diff):
     added_lines = set()
@@ -66,6 +80,9 @@ def parse_diff(diff):
     return added_lines, removed_lines
 
 def is_revert(commit, merges):
+    if not commit:
+        print("Commit vazio")
+        return False
     commit_files = get_commit_diff(commit)
     for m in merges:
         potential_original_commit = get_second_parent_commit(m)
@@ -73,7 +90,6 @@ def is_revert(commit, merges):
             continue
         
         original_files = get_commit_diff(potential_original_commit)
-      
         if set(commit_files) == set(original_files):
             diff_current = get_diff_between_commits(commit, potential_original_commit)
             diff_reverse = get_diff_between_commits(potential_original_commit, commit)
@@ -83,6 +99,7 @@ def is_revert(commit, merges):
 
             # Verificar se as linhas adicionadas/removidas são inversas entre os diffs
             if added_current == removed_reverse and removed_current == added_reverse:
+                print("encontrado revert")
                 return True
     return False
 
@@ -92,6 +109,9 @@ def get_date_six_months_ago():
 
 def main():
     newrev = os.getenv('NEW_COMMIT_HASH')
+    if not newrev:
+        print("NEW_COMMIT_HASH não está definido")
+        return
 
     # Calcular a data de 6 meses atrás
     since_date = get_date_six_months_ago()
@@ -107,8 +127,8 @@ def main():
         print(newrev)
         return newrev  # Retorna o hash do commit que é um revert
     else:
-        print("")
-        return ""  # Retorna string vazia se não for revert
+        print("No revert detected")
+        return None
 
 if __name__ == "__main__":
     main()
