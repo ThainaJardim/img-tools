@@ -26,14 +26,26 @@ def get_main_or_master_branch():
         raise ValueError("Neither 'main' nor 'master' branch found in the repository")
 
 def get_merges_in_branch_since(branch, since_date):
-    result = subprocess.run(
-        ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
-        capture_output=True,
-        text=True
-    )
-    merges = result.stdout.strip().split('\n')
-    return merges
-
+    try:
+        # Executa o comando git rev-list para obter merges desde a data especificada
+        result = subprocess.run(
+            ["git", "rev-list", branch, "--merges", f"--since={since_date}"],
+            capture_output=True,
+            text=True
+        )
+        
+        # Verifica se o comando foi executado com sucesso
+        if result.returncode != 0:
+            print(f"Erro ao executar git rev-list: {result.stderr}")
+            return []
+        
+        # Divide a saída em linhas e remove espaços em branco
+        merges = result.stdout.strip().split('\n')
+        return merges
+    except Exception as e:
+        print(f"Erro ao obter merges: {e}")
+        return []
+    
 def run_git_command(command):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
