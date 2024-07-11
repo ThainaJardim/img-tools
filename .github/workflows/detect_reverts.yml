@@ -1,34 +1,40 @@
 name: Detect Reverts and Amend Commit Message
+
 on: [push]
+
 jobs:
   detect_reverts:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         fetch-depth: 0  # Fetch all history for all branches and tags
+
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+
     - name: Install Git
       run: sudo apt-get install git
+
     - name: Run detect_reverts.py
       id: detect_reverts
       run: |
-        OLD_COMMIT_HASH=$(git rev-parse HEAD~1)
-        NEW_COMMIT_HASH=$(git rev-parse HEAD)
         REVERT_COMMIT=$(python scripts/detect_reverts.py)
         echo "::set-output name=revert_commit::$REVERT_COMMIT"
       env:
         OLD_COMMIT_HASH: ${{ github.event.before }}
         NEW_COMMIT_HASH: ${{ github.sha }}
+
     - name: Configure Git user
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+
     - name: Get branch name
       id: get_branch
       run: echo "::set-output name=branch::$(git rev-parse --abbrev-ref HEAD)"
@@ -36,15 +42,14 @@ jobs:
     - name: Amend commit message
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
-        REVERT_COMMIT=$(echo "${{ steps.detect_reverts.outputs.revert_commit }}" | sed 's/Revert commit detected: //')
+        REVERT_COMMIT=${{ steps.detect_reverts.outputs.revert_commit }}
         BRANCH_NAME=${{ steps.get_branch.outputs.branch }}
         echo "Revert commit detected: $REVERT_COMMIT"
         git checkout $BRANCH_NAME
-        # Ensure the command is correctly formatted and executed
-        GIT_SEQUENCE_EDITOR="sed -i 's/pick $REVERT_COMMIT/edit $REVERT_COMMIT/'" git rebase -i --root
-        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)"
-        git rebase --continue
-        
+        GIT_SEQUENCE_EDITOR="sed -i 's/pick ${REVERT_COMMIT:0:7}/edit ${REVERT_COMMIT:0:7}/'" git rebase -i --root || true
+        git commit --amend -m "Revert $(git log -1 --pretty=%B --skip 1)" || true
+        git rebase --continue || git rebase --skip || true
+
     - name: Push changes
       if: steps.detect_reverts.outputs.revert_commit != ''
       env:
