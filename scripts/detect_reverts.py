@@ -106,7 +106,9 @@ def main():
     if is_revert(newrev, merges):
         print(newrev)
         return newrev  # Retorna o hash do commit que é um revert
-    #será que tem que retornar esse mesmo?
+    else:
+        print("")
+        return ""  # Retorna string vazia se não for revert
 
 if __name__ == "__main__":
     main()
