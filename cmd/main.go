@@ -26,8 +26,3 @@ func main() {
 
 	fmt.Println("processing completed!")
 }
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	fmt.Fprintf(log.Writer(), "Starting...\n")
-}
