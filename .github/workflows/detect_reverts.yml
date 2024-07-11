@@ -23,7 +23,7 @@ jobs:
     - name: Run detect_reverts.py
       id: detect_reverts
       run: |
-        REVERT_COMMIT=$(python scripts/detect_reverts.py)
+        REVERT_COMMIT=$(python scripts/detect_reverts.py | grep -oE '[0-9a-f]{40}')
         echo "::set-output name=revert_commit::$REVERT_COMMIT"
       env:
         OLD_COMMIT_HASH: ${{ github.event.before }}
