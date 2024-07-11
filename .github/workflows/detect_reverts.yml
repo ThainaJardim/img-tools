@@ -33,6 +33,10 @@ jobs:
       if: steps.detect_reverts.outputs.revert_commit != ''
       run: |
         REVERT_COMMIT=${{ steps.detect_reverts.outputs.revert_commit }}
+        if [[ $REVERT_COMMIT == "None" || $REVERT_COMMIT == "" ]]; then
+          echo "No revert commit detected"
+          exit 0
+        fi
         COMMIT_MESSAGE=$(git log -1 --pretty=%B $REVERT_COMMIT)
         if [[ ! $COMMIT_MESSAGE =~ ^Revert ]]; then
           echo "Error: Revert commit detected: $REVERT_COMMIT with incorrect message, expected start with 'Revert'"
