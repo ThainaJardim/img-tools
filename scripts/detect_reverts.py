@@ -131,33 +131,10 @@ def main():
     if is_revert(newrev, merges):
         print(newrev)
         print("O commit é um revert")
-        return newrev  # Retorna o hash do commit que é um revert
+        return newrev 
     else:
         print("O commit não é um revert")
         return ""
 
 if __name__ == "__main__":
     main()
-
-
-def is_revert(commit, merges):
-    commit_files = get_commit_diff(commit)
-    for m in merges:
-        potential_original_commit = get_second_parent_commit(m)
-        if commit == potential_original_commit:
-            continue
-        
-        original_files = get_commit_diff(potential_original_commit)
-        
-        if set(commit_files) == set(original_files):
-            diff_current = get_diff_between_commits(commit, potential_original_commit)
-            diff_reverse = get_diff_between_commits(potential_original_commit, commit)
-
-            add1, del1 = extract_changes(diff_current)
-            add2, del2 = extract_changes(diff_reverse)
-        
-            print(f"Diff do commit {commit} para o commit {potential_original_commit}: {diff_current}")
-            print(f"Diff do commit {potential_original_commit} para o commit {commit}: {diff_reverse}")
-            
-           
-    return False
