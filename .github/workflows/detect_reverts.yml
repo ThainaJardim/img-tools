@@ -8,7 +8,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0  # Fetch all history for all branches and tags
 
@@ -23,7 +23,7 @@ jobs:
     - name: Run detect_reverts.py
       id: detect_reverts
       run: |
-        NEW_COMMIT_HASH=$(git rev-parse HEAD)
+        export NEW_COMMIT_HASH=$(git rev-parse HEAD)
         REVERT_COMMIT=$(python scripts/detect_reverts.py)
         echo "::set-output name=revert_commit::$REVERT_COMMIT"
       env:
